@@ -29,6 +29,8 @@ import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 
+import model.Card;
+
 public class MainAppFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
