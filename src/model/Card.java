@@ -109,7 +109,7 @@ public class Card {
 		if (trimmedName.isEmpty()) {
 			throw new Exception("Name cannot be empty or only whitespace");
 		} else {
-			this.name = name;
+			this.name = trimmedName;
 		}		
 	}
 	
