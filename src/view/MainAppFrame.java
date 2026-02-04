@@ -30,6 +30,8 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 
 import model.Card;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class MainAppFrame extends JFrame {
 
@@ -106,12 +108,19 @@ public class MainAppFrame extends JFrame {
 		pnlDeckEdit.add(lblDeckEdit, "cell 0 0,alignx left,aligny top");
 
 		JButton btnAddCard = new JButton("Add Card");
+		btnAddCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				openCardModalDialog();
+			}
+		});
 		pnlDeckEdit.add(btnAddCard, "flowy,cell 0 1");
 
 		JButton btnEditCard = new JButton("Edit Card");
+		btnEditCard.setEnabled(false);
 		pnlDeckEdit.add(btnEditCard, "cell 0 1");
 
 		JButton btnDeleteCard = new JButton("Delete Card");
+		btnDeleteCard.setEnabled(false);
 		pnlDeckEdit.add(btnDeleteCard, "cell 0 2");
 
 		/* Control Panel/ Test,
@@ -131,5 +140,11 @@ public class MainAppFrame extends JFrame {
 
 	private void start() {
 		setVisible(true);
+	}
+	
+	private void openCardModalDialog() {
+		CardModalDialog dialog = new CardModalDialog(this);
+		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
 	}
 }
