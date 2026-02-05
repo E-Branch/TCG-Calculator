@@ -30,6 +30,8 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 
 import model.Card;
+import model.DeckTable;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -38,6 +40,8 @@ public class MainAppFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTable tblDeckTable;
+	
+	protected DeckTable deckTable;
 
 	/**
 	 * Launch the application.
@@ -82,6 +86,10 @@ public class MainAppFrame extends JFrame {
 		contentPane.add(spDeckTable);
 
 		tblDeckTable = new JTable();
+		
+		deckTable = new DeckTable();
+		tblDeckTable.setModel(deckTable);
+		
 		tblDeckTable.setFillsViewportHeight(true);
 		spDeckTable.setViewportView(tblDeckTable);
 
@@ -146,5 +154,14 @@ public class MainAppFrame extends JFrame {
 		CardModalDialog dialog = new CardModalDialog(this);
 		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		dialog.setVisible(true);
+	}
+	
+	public void addCard(String name, String description, int copies) {
+		try {
+			deckTable.addCard(new Card(name, description, copies));
+			tblDeckTable.updateUI();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
