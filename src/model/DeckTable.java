@@ -69,5 +69,15 @@ public class DeckTable extends AbstractTableModel {
 	public void addCard(Card card) {
 		Deck.add(card);
 	}
+	
+	public void editCard(int inx, String name, String Description, int Copies) {
+		// TODO finish this function
+		// perhaps it should throw an exception in case an invalid inx is provided
+	}
+	
+	public void deleteCard(int inx) {
+		// TODO finish this function
+		// cards after should be moved up an index, not sure if this will effect anything else
+	}
 
 }
