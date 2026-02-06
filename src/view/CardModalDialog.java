@@ -149,6 +149,14 @@ public class CardModalDialog extends JDialog {
 		btnAdd.setHorizontalAlignment(SwingConstants.TRAILING);
 		
 		JButton btnAddAnother = new JButton("Add Another");
+		btnAddAnother.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (validateInput()) {
+					addCard();
+					resetFields();
+				}
+			}
+		});
 		pnlButtons.add(btnAddAnother);
 		btnAddAnother.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		btnAddAnother.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -182,5 +190,11 @@ public class CardModalDialog extends JDialog {
 		parent.addCard(txtName.getText(), 
 				txtDescription.getText(), 
 				(int)spnCopies.getValue());
+	}
+	
+	private void resetFields() {
+		txtName.setText("");
+		txtDescription.setText("");
+		spnCopies.setValue(1);
 	}
 }
