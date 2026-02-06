@@ -31,17 +31,22 @@ import javax.swing.JButton;
 
 import model.Card;
 import model.DeckTable;
+import model.DeckTableSelectionListener;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.ListSelectionModel;
 
 public class MainAppFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTable tblDeckTable;
+	private JButton btnEditCard;
+	private JButton btnDeleteCard;
 	
 	protected DeckTable deckTable;
+	private int selectedInx = -1;
 
 	/**
 	 * Launch the application.
@@ -86,9 +91,15 @@ public class MainAppFrame extends JFrame {
 		contentPane.add(spDeckTable);
 
 		tblDeckTable = new JTable();
+		tblDeckTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
+		// handling the cards in the deck 
 		deckTable = new DeckTable();
 		tblDeckTable.setModel(deckTable);
+		
+		// handling the selection event
+		ListSelectionModel tblDeckTableSelectionModel = tblDeckTable.getSelectionModel();
+		tblDeckTableSelectionModel.addListSelectionListener(new DeckTableSelectionListener(this));
 		
 		tblDeckTable.setFillsViewportHeight(true);
 		spDeckTable.setViewportView(tblDeckTable);
@@ -123,11 +134,15 @@ public class MainAppFrame extends JFrame {
 		});
 		pnlDeckEdit.add(btnAddCard, "flowy,cell 0 1");
 
-		JButton btnEditCard = new JButton("Edit Card");
+		btnEditCard = new JButton("Edit Card");
+		btnEditCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			}
+		});
 		btnEditCard.setEnabled(false);
 		pnlDeckEdit.add(btnEditCard, "cell 0 1");
 
-		JButton btnDeleteCard = new JButton("Delete Card");
+		btnDeleteCard = new JButton("Delete Card");
 		btnDeleteCard.setEnabled(false);
 		pnlDeckEdit.add(btnDeleteCard, "cell 0 2");
 
@@ -163,5 +178,24 @@ public class MainAppFrame extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void noSelection() {
+		btnEditCard.setEnabled(false);
+		btnDeleteCard.setEnabled(false);
+	}
+
+	public void singleSelection(int i) {
+		btnEditCard.setEnabled(true);
+		btnDeleteCard.setEnabled(true);
+		selectedInx = i;
+		// TODO selected Inx needs to be used for editing
+		// haven't yet changed the card modal dialog to allow editing
+	}
+
+	public void multiSelection(int[] selected) {
+		// TODO Auto-generated method stub
+		// currently not possible to select multiple
+		
 	}
 }
