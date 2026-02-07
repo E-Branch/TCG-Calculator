@@ -10,14 +10,14 @@ import javax.swing.table.AbstractTableModel;
 
 public class DeckTable extends AbstractTableModel {
 	
-	private ArrayList<Card> Deck;
+	private ArrayList<Card> deck;
 
 	/**
-	 * creates a new Deck with no cards in it
+	 * Creates a new Deck with no cards in it
 	 */
 	public DeckTable() {
 		// TODO Auto-generated constructor stub
-		Deck = new ArrayList<Card>();
+		deck = new ArrayList<Card>();
 	}
 
 	@Override
@@ -40,44 +40,78 @@ public class DeckTable extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return Deck.size();
+		return deck.size();
 	}
 
 	@Override
 	public Object getValueAt(int arg0, int arg1) {
 		switch(arg1) {
 		case 0:
-			return Deck.get(arg0).getName();
+			return deck.get(arg0).getName();
 		case 1:
-			return Deck.get(arg0).getDescription();
+			return deck.get(arg0).getDescription();
 		case 2:
-			return Deck.get(arg0).getCopies();
+			return deck.get(arg0).getCopies();
 		default:
 			return "";
 		}	
 	}
 	
 	
+	/**
+	 * Returns the full deck size, counting each copy of each card
+	 * 
+	 * @return the deck size
+	 */
 	public int getDeckSize() {
 		int count = 0;
-		for (Card c : Deck) {
+		for (Card c : deck) {
 			count += c.getCopies();
 		}
 		return count;
 	}
 	
+	/**
+	 * Adds the provided card to the end of the list
+	 * 
+	 * @param card
+	 */
 	public void addCard(Card card) {
-		Deck.add(card);
+		deck.add(card);
 	}
 	
-	public void editCard(int inx, String name, String Description, int Copies) {
-		// TODO finish this function
-		// perhaps it should throw an exception in case an invalid inx is provided
+	/**
+	 * Edits the card at index inx
+	 * 
+	 * @param inx the index of the card to edit
+	 * @param name what to set the cards name to
+	 * @param Description what to set the cards description to
+	 * @param copies what to set the number of copies to
+	 * @throws Exception if value set fails, or if index out of range
+	 */
+	public void editCard(int inx, String name, String Description, int copies) throws Exception {
+		if (inx >= deck.size()) {
+			throw new Exception("Selected index out of range");
+		} 
+		else {
+			deck.get(inx).setName(name);
+			deck.get(inx).setDescription(Description);
+			deck.get(inx).setCopies(copies);
+		}
 	}
 	
-	public void deleteCard(int inx) {
-		// TODO finish this function
-		// cards after should be moved up an index, not sure if this will effect anything else
+	/**
+	 * Deletes the card at index inx, shifting the cards after it up one index
+	 * 
+	 * @param inx the index of the card to delete
+	 * @throws Exception if index out of range
+	 */
+	public void deleteCard(int inx) throws Exception {
+		if (inx >= deck.size()) {
+			throw new Exception("Selected index out of range");
+		} else {
+			deck.remove(inx);
+		}
 	}
 
 }
