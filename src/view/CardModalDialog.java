@@ -42,6 +42,7 @@ public class CardModalDialog extends JDialog {
 	private JSpinner spnCopies;
 	
 	private MainAppFrame parent;
+	private int inx = -1;
 
 	/**
 	 * Launch the application.
@@ -59,14 +60,23 @@ public class CardModalDialog extends JDialog {
 			}
 		});
 	}
-
+	
 	/**
 	 * Create the dialog.
+	 * @wbp.parser.constructor
 	 */
 	public CardModalDialog(MainAppFrame parent) {
-		super(parent, "Card Dialog", true);	// Eventually should be changed to say add or edit depending on what the user is doing
+		super(parent, "Add Card", true);	// Eventually should be changed to say add or edit depending on what the user is doing
 		this.parent = parent;
 		initGUI();
+	}
+	
+	public CardModalDialog(MainAppFrame parent, int inx) throws Exception {
+		super(parent, "Edit Card", true);	// Eventually should be changed to say add or edit depending on what the user is doing
+		this.parent = parent;
+		this.inx = inx;
+		initGUI();
+		updateFields();
 	}
 	
 	private void initGUI() {
@@ -107,7 +117,7 @@ public class CardModalDialog extends JDialog {
 		sl_pnlCopies.putConstraint(SpringLayout.EAST, spnCopies, 40, SpringLayout.WEST, pnlCopies);
 		pnlCopies.add(spnCopies);
 		
-		//button bar
+		/* button bar */
 		
 		JPanel pnlBottom = new JPanel();
 		getContentPane().add(pnlBottom, BorderLayout.SOUTH);
@@ -127,7 +137,21 @@ public class CardModalDialog extends JDialog {
 		btnCancel.setVerticalAlignment(SwingConstants.BOTTOM);
 		btnCancel.setHorizontalAlignment(SwingConstants.TRAILING);
 		
+		/* edit button */
+		
 		JButton btnEdit = new JButton("Edit");
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (validateInput()) {
+					try {
+						editCard();
+						dispose();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 		pnlButtons.add(btnEdit);
 		btnEdit.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		btnEdit.setVerticalAlignment(SwingConstants.BOTTOM);
@@ -135,11 +159,15 @@ public class CardModalDialog extends JDialog {
 		
 		JButton btnAdd = new JButton("Add");
 		btnAdd.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent arg0) {
 				if (validateInput()) {
 					// add an item to the deck
-					addCard();
-					dispose();
+					try {
+						addCard();
+						dispose();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -152,8 +180,12 @@ public class CardModalDialog extends JDialog {
 		btnAddAnother.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (validateInput()) {
-					addCard();
-					resetFields();
+					try {
+						addCard();
+						resetFields();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -161,6 +193,19 @@ public class CardModalDialog extends JDialog {
 		btnAddAnother.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		btnAddAnother.setHorizontalAlignment(SwingConstants.RIGHT);
 		btnAddAnother.setVerticalAlignment(SwingConstants.BOTTOM);
+		
+		// show or hid buttons depending on if we are editing or adding
+		if (inx == -1) {
+			btnAdd.setVisible(true);
+			btnAddAnother.setVisible(true);
+			
+			btnEdit.setVisible(false);
+		} else {
+			btnAdd.setVisible(false);
+			btnAddAnother.setVisible(false);
+			
+			btnEdit.setVisible(true);
+		}
 
 	}
 	
@@ -186,15 +231,29 @@ public class CardModalDialog extends JDialog {
 		}
 	}
 	
-	private void addCard() {
-		parent.addCard(txtName.getText(), 
+	private void addCard() throws Exception {
+		Card newCard = new Card(txtName.getText(), 
 				txtDescription.getText(), 
 				(int)spnCopies.getValue());
+		parent.deckTable.addCard(newCard);
+		parent.updateUI();
+	}
+	
+	private void editCard() throws Exception {
+		parent.deckTable.editCard(inx, txtName.getText(), txtDescription.getText(), (int)spnCopies.getValue());
+		parent.updateUI();
 	}
 	
 	private void resetFields() {
 		txtName.setText("");
 		txtDescription.setText("");
 		spnCopies.setValue(1);
+	}
+	
+	private void updateFields() throws Exception {
+		Card editCard = parent.deckTable.getCard(inx);
+		txtName.setText(editCard.getName());
+		txtDescription.setText(editCard.getDescription());
+		spnCopies.setValue(editCard.getCopies());
 	}
 }

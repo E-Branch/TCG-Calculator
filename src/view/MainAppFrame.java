@@ -137,6 +137,7 @@ public class MainAppFrame extends JFrame {
 		btnEditCard = new JButton("Edit Card");
 		btnEditCard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				openCardModalDialog(selectedInx);
 			}
 		});
 		btnEditCard.setEnabled(false);
@@ -171,15 +172,17 @@ public class MainAppFrame extends JFrame {
 		dialog.setVisible(true);
 	}
 	
-	public void addCard(String name, String description, int copies) {
+	private void openCardModalDialog(int inx) {
+		CardModalDialog dialog;
 		try {
-			deckTable.addCard(new Card(name, description, copies));
-			tblDeckTable.updateUI();
+			dialog = new CardModalDialog(this, inx);
+			dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void noSelection() {
 		btnEditCard.setEnabled(false);
 		btnDeleteCard.setEnabled(false);
@@ -189,13 +192,18 @@ public class MainAppFrame extends JFrame {
 		btnEditCard.setEnabled(true);
 		btnDeleteCard.setEnabled(true);
 		selectedInx = i;
-		// TODO selected Inx needs to be used for editing
-		// haven't yet changed the card modal dialog to allow editing
 	}
 
 	public void multiSelection(int[] selected) {
 		// TODO Auto-generated method stub
 		// currently not possible to select multiple
 		
+	}
+	
+	/**
+	 * updates the table element
+	 */
+	protected void updateUI() {
+		tblDeckTable.updateUI();
 	}
 }
