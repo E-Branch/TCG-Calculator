@@ -31,14 +31,18 @@ public class DeckTableSelectionListener implements ListSelectionListener {
 		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 		
 		int[] selected = lsm.getSelectedIndices();
-		switch(selected.length){
+		
+		switch(selected.length){ 
 		case 0:
 			parent.noSelection();
-		case 1:
+			break;
+		case 1: 
 			parent.singleSelection(selected[0]);
+			break;
 		default:
-			parent.multiSelection(selected);
+			parent.multiSelection(selected); 
 		}
+		 
 
 	}
 
