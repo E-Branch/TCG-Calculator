@@ -144,6 +144,11 @@ public class MainAppFrame extends JFrame {
 		pnlDeckEdit.add(btnEditCard, "cell 0 1");
 
 		btnDeleteCard = new JButton("Delete Card");
+		btnDeleteCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openDeleteCardDialog(selectedInx);
+			}
+		});
 		btnDeleteCard.setEnabled(false);
 		pnlDeckEdit.add(btnDeleteCard, "cell 0 2");
 
@@ -183,6 +188,19 @@ public class MainAppFrame extends JFrame {
 		}
 	}
 	
+	protected void openDeleteCardDialog(int inx) {
+		// TODO Auto-generated method stub
+		CardDeleteDialog dialog;
+		try {
+			dialog = new CardDeleteDialog(this, inx);
+			dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
 	public void noSelection() {
 		btnEditCard.setEnabled(false);
 		btnDeleteCard.setEnabled(false);
@@ -205,5 +223,13 @@ public class MainAppFrame extends JFrame {
 	 */
 	protected void updateUI() {
 		tblDeckTable.updateUI();
+	}
+	
+	/**
+	 * clear the selection after deletion
+	 */
+	protected void clearSelection() {
+		//tblDeckTable.clearSelection();
+		tblDeckTable.getSelectionModel().clearSelection();
 	}
 }
