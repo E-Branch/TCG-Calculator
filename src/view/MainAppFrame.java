@@ -112,8 +112,19 @@ public class MainAppFrame extends JFrame {
 		JMenu mnImport = new JMenu("Import Deck...");
 		mnFile.add(mnImport);
 		
-		JMenuItem mntmFromYDK = new JMenuItem("... from YDK");
-		mnImport.add(mntmFromYDK);
+		/**
+		 * YDK gives a list of card IDs
+		 * Connecting to external card databases is a bit beyond the scope
+		 */
+		/*
+		 * JMenuItem mntmFromYDK = new JMenuItem("... from YDK");
+		 * mnImport.add(mntmFromYDK);
+		 */
+		
+		
+		
+		
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
