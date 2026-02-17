@@ -36,6 +36,10 @@ import model.DeckTableSelectionListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
 
 public class MainAppFrame extends JFrame {
 
@@ -76,6 +80,40 @@ public class MainAppFrame extends JFrame {
 	private void initGUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
+		
+		/**
+		 * Menu Bar
+		 */
+		
+		JMenuBar mnbrMainMenu = new JMenuBar();
+		setJMenuBar(mnbrMainMenu);
+		
+		JMenu mnFile = new JMenu("File");
+		mnbrMainMenu.add(mnFile);
+		
+		JMenuItem mntmSaveCSV = new JMenuItem("Save Deck (CSV)");
+		mnFile.add(mntmSaveCSV);
+		
+		JMenuItem mntmLoadCsv = new JMenuItem("Load Deck (CSV)");
+		mnFile.add(mntmLoadCsv);
+		
+		JSeparator separator = new JSeparator();
+		mnFile.add(separator);
+		
+		JMenuItem mntmSaveJson = new JMenuItem("Save Deck (JSON)");
+		mnFile.add(mntmSaveJson);
+		
+		JMenuItem mntmLoadJson = new JMenuItem("Load Deck (JSON)");
+		mnFile.add(mntmLoadJson);
+		
+		JSeparator separator_1 = new JSeparator();
+		mnFile.add(separator_1);
+		
+		JMenu mnImport = new JMenu("Import Deck...");
+		mnFile.add(mnImport);
+		
+		JMenuItem mntmFromYDK = new JMenuItem("... from YDK");
+		mnImport.add(mntmFromYDK);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
