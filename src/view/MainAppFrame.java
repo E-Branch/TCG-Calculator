@@ -106,11 +106,11 @@ public class MainAppFrame extends JFrame {
 		JMenuItem mntmLoadJson = new JMenuItem("Load Deck (JSON)");
 		mnFile.add(mntmLoadJson);
 		
-		JSeparator separator_1 = new JSeparator();
-		mnFile.add(separator_1);
-		
-		JMenu mnImport = new JMenu("Import Deck...");
-		mnFile.add(mnImport);
+		/*
+		 * JSeparator separator_1 = new JSeparator(); mnFile.add(separator_1);
+		 * 
+		 * JMenu mnImport = new JMenu("Import Deck..."); mnFile.add(mnImport);
+		 */
 		
 		/**
 		 * YDK gives a list of card IDs
