@@ -29,11 +29,24 @@ import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 
+import model.Card;
+import model.DeckTable;
+import model.DeckTableSelectionListener;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.ListSelectionModel;
+
 public class MainAppFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTable tblDeckTable;
+	private JButton btnEditCard;
+	private JButton btnDeleteCard;
+	
+	protected DeckTable deckTable;
+	private int selectedInx = -1;
 
 	/**
 	 * Launch the application.
@@ -78,6 +91,16 @@ public class MainAppFrame extends JFrame {
 		contentPane.add(spDeckTable);
 
 		tblDeckTable = new JTable();
+		tblDeckTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		// handling the cards in the deck 
+		deckTable = new DeckTable();
+		tblDeckTable.setModel(deckTable);
+		
+		// handling the selection event
+		ListSelectionModel tblDeckTableSelectionModel = tblDeckTable.getSelectionModel();
+		tblDeckTableSelectionModel.addListSelectionListener(new DeckTableSelectionListener(this));
+		
 		tblDeckTable.setFillsViewportHeight(true);
 		spDeckTable.setViewportView(tblDeckTable);
 
@@ -104,12 +127,29 @@ public class MainAppFrame extends JFrame {
 		pnlDeckEdit.add(lblDeckEdit, "cell 0 0,alignx left,aligny top");
 
 		JButton btnAddCard = new JButton("Add Card");
+		btnAddCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				openCardModalDialog();
+			}
+		});
 		pnlDeckEdit.add(btnAddCard, "flowy,cell 0 1");
 
-		JButton btnEditCard = new JButton("Edit Card");
+		btnEditCard = new JButton("Edit Card");
+		btnEditCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				openCardModalDialog(selectedInx);
+			}
+		});
+		btnEditCard.setEnabled(false);
 		pnlDeckEdit.add(btnEditCard, "cell 0 1");
 
-		JButton btnDeleteCard = new JButton("Delete Card");
+		btnDeleteCard = new JButton("Delete Card");
+		btnDeleteCard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openDeleteCardDialog(selectedInx);
+			}
+		});
+		btnDeleteCard.setEnabled(false);
 		pnlDeckEdit.add(btnDeleteCard, "cell 0 2");
 
 		/* Control Panel/ Test,
@@ -129,5 +169,67 @@ public class MainAppFrame extends JFrame {
 
 	private void start() {
 		setVisible(true);
+	}
+	
+	private void openCardModalDialog() {
+		CardModalDialog dialog = new CardModalDialog(this);
+		dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
+	}
+	
+	private void openCardModalDialog(int inx) {
+		CardModalDialog dialog;
+		try {
+			dialog = new CardModalDialog(this, inx);
+			dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void openDeleteCardDialog(int inx) {
+		// TODO Auto-generated method stub
+		CardDeleteDialog dialog;
+		try {
+			dialog = new CardDeleteDialog(this, inx);
+			dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	public void noSelection() {
+		btnEditCard.setEnabled(false);
+		btnDeleteCard.setEnabled(false);
+	}
+
+	public void singleSelection(int i) {
+		btnEditCard.setEnabled(true);
+		btnDeleteCard.setEnabled(true);
+		selectedInx = i;
+	}
+
+	public void multiSelection(int[] selected) {
+		// TODO Auto-generated method stub
+		// currently not possible to select multiple
+		
+	}
+	
+	/**
+	 * updates the table element
+	 */
+	protected void updateUI() {
+		tblDeckTable.updateUI();
+	}
+	
+	/**
+	 * clear the selection after deletion
+	 */
+	protected void clearSelection() {
+		//tblDeckTable.clearSelection();
+		tblDeckTable.getSelectionModel().clearSelection();
 	}
 }
