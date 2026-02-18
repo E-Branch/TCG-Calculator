@@ -12,6 +12,8 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+
 import java.awt.Window.Type;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
@@ -28,12 +30,14 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 
 import model.Card;
 import model.DeckTable;
 import model.DeckTableSelectionListener;
 
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
 import javax.swing.JMenuBar;
@@ -51,6 +55,8 @@ public class MainAppFrame extends JFrame {
 	
 	protected DeckTable deckTable;
 	private int selectedInx = -1;
+	
+	final JFileChooser fileChooser = new JFileChooser();
 
 	/**
 	 * Launch the application.
@@ -91,20 +97,21 @@ public class MainAppFrame extends JFrame {
 		JMenu mnFile = new JMenu("File");
 		mnbrMainMenu.add(mnFile);
 		
-		JMenuItem mntmSaveCSV = new JMenuItem("Save Deck (CSV)");
-		mnFile.add(mntmSaveCSV);
+		JMenuItem mntmLoad = new JMenuItem("Load Deck");
+		mntmLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				loadFile();
+			}
+		});
+		mnFile.add(mntmLoad);
 		
-		JMenuItem mntmLoadCsv = new JMenuItem("Load Deck (CSV)");
-		mnFile.add(mntmLoadCsv);
-		
-		JSeparator separator = new JSeparator();
-		mnFile.add(separator);
-		
-		JMenuItem mntmSaveJson = new JMenuItem("Save Deck (JSON)");
-		mnFile.add(mntmSaveJson);
-		
-		JMenuItem mntmLoadJson = new JMenuItem("Load Deck (JSON)");
-		mnFile.add(mntmLoadJson);
+		JMenuItem mntmSave = new JMenuItem("Save Deck");
+		mntmSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveFile();
+			}
+		});
+		mnFile.add(mntmSave);
 		
 		/*
 		 * JSeparator separator_1 = new JSeparator(); mnFile.add(separator_1);
@@ -266,6 +273,29 @@ public class MainAppFrame extends JFrame {
 		// currently not possible to select multiple
 		
 	}
+	
+	private void loadFile() {
+		int returnVal = fileChooser.showOpenDialog(this);
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			System.out.println(file.getPath());
+		} else {
+			System.out.println("action canceled");
+		}
+	}
+	
+	private void saveFile() {
+		int returnVal = fileChooser.showSaveDialog(this);
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			System.out.println(file.getPath());
+		} else {
+			System.out.println("action canceled");
+		}
+	}
+	
 	
 	/**
 	 * updates the table element
