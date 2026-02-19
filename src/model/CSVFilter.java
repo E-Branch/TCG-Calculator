@@ -17,10 +17,10 @@ public class CSVFilter extends FileFilter {
 		if (file.isDirectory()) {
 			return true;	// allows users to navigate file system
 		}
-		String extention = Utils.getExtention(file);
+		//String extension = Utils.getExtention(file);
 		
-		if (!extention.isBlank()) {
-			if (extention.equals(Utils.csv)) {
+		if (!Utils.extensionIsBlank(file)) {
+			if (Utils.isCSV(file)) {
 				return true;
 			}
 		}
