@@ -17,10 +17,10 @@ public class JSONFilter extends FileFilter {
 		if (file.isDirectory()) {
 			return true;	// allows users to navigate file system
 		}
-		String extention = Utils.getExtention(file);
+		//String extension = Utils.getExtension(file);
 		
-		if (!extention.isBlank()) {
-			if (extention.equals(Utils.json)) {
+		if (!Utils.extensionIsBlank(file)) {
+			if (Utils.isJSON(file)) {
 				return true;
 			}
 		}
