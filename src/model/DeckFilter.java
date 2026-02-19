@@ -24,10 +24,10 @@ public class DeckFilter extends FileFilter {
 		if (file.isDirectory()) {
 			return true;	// allows users to navigate file system
 		}
-		String extention = Utils.getExtention(file);
+		//String extension = Utils.getExtension(file);
 		
-		if (!extention.isBlank()) {
-			if (extention.equals(Utils.csv) || extention.equals(Utils.json)) {
+		if (!Utils.extensionIsBlank(file)) {
+			if (Utils.isCSV(file) || Utils.isJSON(file)) {
 				return true;
 			}
 		}
