@@ -3,7 +3,12 @@
  */
 package model;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -11,6 +16,9 @@ import javax.swing.table.AbstractTableModel;
 public class DeckTable extends AbstractTableModel {
 	
 	private ArrayList<Card> deck;
+	
+	Pattern CSVPattern = Pattern.compile("'(?<name>.*)','?(?<desc>[^']*)'?,'?(?<count>[^']*)'?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+	
 
 	/**
 	 * Creates a new Deck with no cards in it
@@ -18,7 +26,24 @@ public class DeckTable extends AbstractTableModel {
 	public DeckTable() {
 		// TODO Auto-generated constructor stub
 		deck = new ArrayList<Card>();
+		
+		 
 	}
+	
+	/**
+	 * Creates a new Deck populated with cards from file
+	 */
+	public DeckTable(File file) {
+		this();
+		
+		if(Utils.isCSV(file)) {
+			readCSVFile(file);
+		} else if (Utils.isJSON(file)) {
+			readJSONFile(file);
+		}
+		
+	}
+
 
 	@Override
 	public int getColumnCount() {
@@ -174,5 +199,97 @@ public class DeckTable extends AbstractTableModel {
 			return deck.get(inx);
 		}
 	}
+	
+	/**
+	 * Clears the current deck and loads the cards from the provided file
+	 * 
+	 * @param file CSV or JSON file, CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 */
+	public void loadFromFile(File file) {
+		deck.clear();
+		
+		if(Utils.isCSV(file)) {
+			readCSVFile(file);
+		} else if (Utils.isJSON(file)) {
+			readJSONFile(file);
+		}
+	}
+	
+	/**
+	 * loads the cards from the provided CSV file into deck
+	 * @param file CSV file, CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 */
+	private void readCSVFile(File file) {
+		boolean firstLine = true;
+		try (Scanner fileReader = new Scanner(file)){
+			while (fileReader.hasNextLine()) {
+				String nextLine = fileReader.nextLine();
+				if (firstLine == false) {
+					
+					Matcher m = CSVPattern.matcher(nextLine);
+					m.matches();
+					
+					String name = m.group(1);
+					String desc = m.group(2);
+					int count = Integer.parseInt(m.group(3));
+					
+					
+					try {
+						Card newCard = new Card(name, desc, count);
+						addCard(newCard);
+					} catch (Exception e) {
+						// TODO: instead, should perhaps throw an exception, giving the user more information on which card failed to load
+						System.out.println("Error Loading Card");
+						e.printStackTrace();
+					}
+					
+					//System.out.println(deck);
+					
+					
+					
+				} else {
+					firstLine = false;
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO: instead, should perhaps throw an exception?
+			System.out.println("Error opening CSV file");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Creates a list of lines to save to the CSV file
+	 * @return an array list of strings, of lines to save to the CSV, in the format like: CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 */
+	public ArrayList<String> toCSVLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		
+		lines.add("'Name','Description','Copies'");
+		
+		for (Card c : deck) {
+			String s = "";
+			s = s + "'" + c.getName() + "',";
+			if (c.getDescription().isBlank()) {
+				s = s + ",";
+			} else {
+				s = s + "'" + c.getDescription() + "',";
+			}
+			
+			s = s + c.getCopies();
+			
+			lines.add(s);
+		}
+		
+		return lines;
+	}
 
+	/**
+	 * loads the cards from the provided JSON file into the deck
+	 * @param file the JSON file to read
+	 */
+	private void readJSONFile(File file) {
+		// TODO: method stub
+		
+	}
 }
