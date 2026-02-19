@@ -42,6 +42,9 @@ import model.JSONFilter;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
@@ -283,37 +286,53 @@ public class MainAppFrame extends JFrame {
 		
 	}
 	
+	/**
+	 * Opens a filechooser to select a file to load, exits if action canceled
+	 */
 	private void loadFile() {
+		// TODO: Check if changes have been made to open deck
+		// if so, there should be a dialog to ask if the user wants to save their changes
 		int returnVal = fileChooser.showOpenDialog(this);
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
-			System.out.println(file.getPath());
-			readFile(file);
+
+			deckTable.loadFromFile(file);
+			updateUI();
 		} else {
 			System.out.println("action canceled");
 		}
 	}
 	
-	private void readFile(File file) {
-		
-		try (Scanner fileReader = new Scanner(file)){
-			while (fileReader.hasNextLine()) {
-				String line = fileReader.nextLine();
-				System.out.println(line);
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println("error reading file");
-			e.printStackTrace();
-		}
-	}
-	
+	/**
+	 * Opens a file chooser to select a save file, exits if action canceled or file write error
+	 * if successful, it will save the current deck to the selected file
+	 */
 	private void saveFile() {
+		// TODO: Check if the deck already has a filename
+		// regular "Save" should automatically overwrite if deck already has filename
+		// opens file chooser if "Save As" chosen or if deck doesn't have filename already
 		int returnVal = fileChooser.showSaveDialog(this);
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();
-			System.out.println(file.getPath());
+			File file = fileChooser.getSelectedFile();			
+				
+			try {
+				FileWriter fileWriter = new FileWriter(file);
+				
+				ArrayList<String> lines = deckTable.toCSVLines();
+				fileWriter.write("");
+				for (String l: lines) {
+					fileWriter.append(l);
+					fileWriter.append("\n");
+				}
+				fileWriter.close();
+				
+			} catch (IOException e) {
+				System.out.println("file write error");
+				e.printStackTrace();
+			}
+			
 		} else {
 			System.out.println("action canceled");
 		}
@@ -331,7 +350,6 @@ public class MainAppFrame extends JFrame {
 	 * clear the selection after deletion
 	 */
 	protected void clearSelection() {
-		//tblDeckTable.clearSelection();
 		tblDeckTable.getSelectionModel().clearSelection();
 	}
 }
