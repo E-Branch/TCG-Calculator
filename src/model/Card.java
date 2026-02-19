@@ -120,6 +120,7 @@ public class Card {
 	 * @param description the description to set
 	 */
 	public void setDescription(String description) {
+		// TODO: disallow "'" character, as it will cause issue with saving and loading deck files
 		this.description = description.trim();
 	}
 	
