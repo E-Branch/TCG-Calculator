@@ -32,12 +32,17 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
+import model.CSVFilter;
 import model.Card;
+import model.DeckFilter;
 import model.DeckTable;
 import model.DeckTableSelectionListener;
+import model.JSONFilter;
 
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
 import javax.swing.JMenuBar;
@@ -79,6 +84,10 @@ public class MainAppFrame extends JFrame {
 	 */
 	public MainAppFrame() {
 		setTitle("TCG Calculator by E-BRANCH");
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(new DeckFilter());
+		fileChooser.addChoosableFileFilter(new CSVFilter());
+		fileChooser.addChoosableFileFilter(new JSONFilter());
 		initGUI();
 
 	}
@@ -280,8 +289,22 @@ public class MainAppFrame extends JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			System.out.println(file.getPath());
+			readFile(file);
 		} else {
 			System.out.println("action canceled");
+		}
+	}
+	
+	private void readFile(File file) {
+		
+		try (Scanner fileReader = new Scanner(file)){
+			while (fileReader.hasNextLine()) {
+				String line = fileReader.nextLine();
+				System.out.println(line);
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("error reading file");
+			e.printStackTrace();
 		}
 	}
 	
