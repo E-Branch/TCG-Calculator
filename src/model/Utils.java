@@ -27,4 +27,14 @@ public class Utils {
 	public static boolean isJSON(File f) {
 		return getExtension(f).equals(json);
 	}
+	
+	public static String escapeQuotes(String s) {
+		s = s.replaceAll("\"", "\\\\\"");
+		return s;
+	}
+	
+	public static String reverseEscapeQuotes(String s) {
+		s = s.translateEscapes();
+		return s;
+	}
 }
