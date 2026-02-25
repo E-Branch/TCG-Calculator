@@ -17,8 +17,12 @@ public class DeckTable extends AbstractTableModel {
 	
 	private ArrayList<Card> deck;
 	
-	Pattern CSVPattern = Pattern.compile("\"(?<name>.*)\",\"(?<desc>[^']*)\",\"?(?<count>[^']*)\"?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-	
+	Pattern CSVPattern = Pattern.compile("\"(?<name>.*)\",\"(?<desc>.*)\",\"?(?<count>.*)\"?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+	Pattern JSONArrayPattern = Pattern.compile("\\[(?<array>.*)\\]", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONObjectPattern = Pattern.compile("\\{(?<obj>.*)\\}", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONNamePattern = Pattern.compile("\"name\": \"(?<name>.*)\",[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONDescPattern = Pattern.compile("\"desc\": \"(?<desc>.*)\",[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONCopiesPattern = Pattern.compile("\"copies\": (?<copies>.*)[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	/**
 	 * Creates a new Deck with no cards in it
@@ -286,6 +290,41 @@ public class DeckTable extends AbstractTableModel {
 	 */
 	private void readJSONFile(File file) {
 		// TODO: method stub
+		try (Scanner fileReader = new Scanner(file)){
+			fileReader.next("\\[");
+			
+			while(fileReader.hasNext("\\{")) {
+				fileReader.next("\\{");
+				fileReader.nextLine();
+				
+				String nameLine = fileReader.nextLine();
+				Matcher nameMatcher = JSONNamePattern.matcher(nameLine);
+				nameMatcher.find();
+				
+				String name = nameMatcher.group(1);
+				System.out.println("Name: " + name);
+				
+				String descLine = fileReader.nextLine();
+				Matcher descMatcher = JSONDescPattern.matcher(descLine);
+				descMatcher.find();
+				
+				String desc = nameMatcher.group(1);
+				System.out.println("Desc: " + desc);
+				
+				String copiesLine = fileReader.nextLine();
+				Matcher copiesMatcher = JSONCopiesPattern.matcher(copiesLine);
+				copiesMatcher.find();
+				
+				int copies = Integer.parseInt(copiesMatcher.group(1));
+				System.out.println("Copies: " + copies);
+				
+			}
+			
+		}catch (FileNotFoundException e) {
+			// TODO: instead, should perhaps throw an exception?
+			System.out.println("Error opening JSON file");
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -304,7 +343,7 @@ public class DeckTable extends AbstractTableModel {
 			s = "		\"desc\": \"" + Utils.escapeQuotes(c.getDescription()) + "\",";
 			lines.add(s);
 			
-			s = "		\"copies\": " + c.getCopies() + ",";
+			s = "		\"copies\": " + c.getCopies() + "";
 			lines.add(s);
 			
 			lines.add("	},");
