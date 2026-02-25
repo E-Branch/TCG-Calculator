@@ -17,7 +17,7 @@ public class DeckTable extends AbstractTableModel {
 	
 	private ArrayList<Card> deck;
 	
-	Pattern CSVPattern = Pattern.compile("'(?<name>.*)','?(?<desc>[^']*)'?,'?(?<count>[^']*)'?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+	Pattern CSVPattern = Pattern.compile("\"(?<name>.*)\",\"(?<desc>[^']*)\",\"?(?<count>[^']*)\"?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
 	
 
 	/**
@@ -203,7 +203,7 @@ public class DeckTable extends AbstractTableModel {
 	/**
 	 * Clears the current deck and loads the cards from the provided file
 	 * 
-	 * @param file CSV or JSON file, CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 * @param file CSV or JSON file
 	 */
 	public void loadFromFile(File file) {
 		deck.clear();
@@ -217,7 +217,7 @@ public class DeckTable extends AbstractTableModel {
 	
 	/**
 	 * loads the cards from the provided CSV file into deck
-	 * @param file CSV file, CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 * @param file CSV file
 	 */
 	private void readCSVFile(File file) {
 		boolean firstLine = true;
@@ -229,8 +229,8 @@ public class DeckTable extends AbstractTableModel {
 					Matcher m = CSVPattern.matcher(nextLine);
 					m.matches();
 					
-					String name = m.group(1);
-					String desc = m.group(2);
+					String name = Utils.reverseEscapeQuotes(m.group(1));
+					String desc = Utils.reverseEscapeQuotes(m.group(2));
 					int count = Integer.parseInt(m.group(3));
 					
 					
@@ -260,22 +260,18 @@ public class DeckTable extends AbstractTableModel {
 	
 	/**
 	 * Creates a list of lines to save to the CSV file
-	 * @return an array list of strings, of lines to save to the CSV, in the format like: CSV of format like: "'Name','Description','Copies'\n'name1','description',1\n'name2',,6"
+	 * @return an array list of strings, of lines to save to the CSV, with double quotes for strings (escape double quotes inside strings)
 	 */
 	public ArrayList<String> toCSVLines() {
 		ArrayList<String> lines = new ArrayList<String>();
 		
-		lines.add("'Name','Description','Copies'");
+		lines.add("\"Name\",\"Description\",\"Copies\"");
 		
 		for (Card c : deck) {
 			String s = "";
-			s = s + "'" + c.getName() + "',";
-			if (c.getDescription().isBlank()) {
-				s = s + ",";
-			} else {
-				s = s + "'" + c.getDescription() + "',";
-			}
+			s = s + "\"" + Utils.escapeQuotes(c.getName()) + "\",";
 			
+			s = s + "\"" + Utils.escapeQuotes(c.getDescription()) + "\",";
 			s = s + c.getCopies();
 			
 			lines.add(s);
@@ -291,5 +287,30 @@ public class DeckTable extends AbstractTableModel {
 	private void readJSONFile(File file) {
 		// TODO: method stub
 		
+	}
+	
+	public ArrayList<String> toJSONLines(){
+		ArrayList<String> lines = new ArrayList<String>();
+		
+		lines.add("[");
+		
+		for (Card c: deck) {
+			String s = "";
+			lines.add("	{");
+			
+			s = "		\"name\": \"" + Utils.escapeQuotes(c.getName()) + "\",";
+			lines.add(s);
+			
+			s = "		\"desc\": \"" + Utils.escapeQuotes(c.getDescription()) + "\",";
+			lines.add(s);
+			
+			s = "		\"copies\": " + c.getCopies() + ",";
+			lines.add(s);
+			
+			lines.add("	},");
+		}
+		
+		lines.add("]");
+		return lines;
 	}
 }
