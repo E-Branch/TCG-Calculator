@@ -38,6 +38,7 @@ import model.DeckFilter;
 import model.DeckTable;
 import model.DeckTableSelectionListener;
 import model.JSONFilter;
+import model.Utils;
 
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -319,8 +320,14 @@ public class MainAppFrame extends JFrame {
 				
 			try {
 				FileWriter fileWriter = new FileWriter(file);
-				
-				ArrayList<String> lines = deckTable.toCSVLines();
+				ArrayList<String> lines;
+				if (Utils.isCSV(file)) {
+					lines = deckTable.toCSVLines();
+				} else if (Utils.isJSON(file)) {
+					lines = deckTable.toJSONLines();
+				} else {
+					throw new Exception("invalid file extension");
+				}
 				fileWriter.write("");
 				for (String l: lines) {
 					fileWriter.append(l);
@@ -328,7 +335,7 @@ public class MainAppFrame extends JFrame {
 				}
 				fileWriter.close();
 				
-			} catch (IOException e) {
+			} catch (Exception e) {
 				System.out.println("file write error");
 				e.printStackTrace();
 			}
