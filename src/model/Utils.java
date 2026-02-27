@@ -28,12 +28,14 @@ public class Utils {
 		return getExtension(f).equals(json);
 	}
 	
-	public static String escapeQuotes(String s) {
+	public static String escapeSpecialCharacters(String s) {
 		s = s.replaceAll("\"", "\\\\\"");
+		s = s.replaceAll("\n", "\\\\\\n");
+		s = s.replaceAll("\r", "\\\\\\r");
 		return s;
 	}
 	
-	public static String reverseEscapeQuotes(String s) {
+	public static String reverseEscapeSpecialCharacters(String s) {
 		s = s.translateEscapes();
 		return s;
 	}

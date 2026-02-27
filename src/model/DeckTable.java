@@ -234,8 +234,8 @@ public class DeckTable extends AbstractTableModel {
 					Matcher m = CSVPattern.matcher(nextLine);
 					m.matches();
 					
-					String name = Utils.reverseEscapeQuotes(m.group(1));
-					String desc = Utils.reverseEscapeQuotes(m.group(2));
+					String name = Utils.reverseEscapeSpecialCharacters(m.group(1));
+					String desc = Utils.reverseEscapeSpecialCharacters(m.group(2));
 					int count = Integer.parseInt(m.group(3));
 					
 					
@@ -275,8 +275,8 @@ public class DeckTable extends AbstractTableModel {
 		
 		for (Card c : deck) {	// creates a line for card, eg. "Ace","The \"1\" card, often the highest value card",4
 			String s = "";
-			s = s + "\"" + Utils.escapeQuotes(c.getName()) + "\",";
-			s = s + "\"" + Utils.escapeQuotes(c.getDescription()) + "\",";
+			s = s + "\"" + Utils.escapeSpecialCharacters(c.getName()) + "\",";
+			s = s + "\"" + Utils.escapeSpecialCharacters(c.getDescription()) + "\",";
 			s = s + c.getCopies();
 			
 			lines.add(s);
@@ -305,7 +305,7 @@ public class DeckTable extends AbstractTableModel {
 				Matcher nameMatcher = JSONNamePattern.matcher(nameLine);
 				nameMatcher.find();
 				
-				String name = Utils.reverseEscapeQuotes(nameMatcher.group(1));
+				String name = Utils.reverseEscapeSpecialCharacters(nameMatcher.group(1));
 				
 				
 				// description line
@@ -313,7 +313,7 @@ public class DeckTable extends AbstractTableModel {
 				Matcher descMatcher = JSONDescPattern.matcher(descLine);
 				descMatcher.find();
 				
-				String desc = Utils.reverseEscapeQuotes(descMatcher.group(1));
+				String desc = Utils.reverseEscapeSpecialCharacters(descMatcher.group(1));
 				
 				
 				// copies line
@@ -362,10 +362,10 @@ public class DeckTable extends AbstractTableModel {
 			String s = "";
 			lines.add("	{");
 			
-			s = "		\"name\": \"" + Utils.escapeQuotes(c.getName()) + "\",";
+			s = "		\"name\": \"" + Utils.escapeSpecialCharacters(c.getName()) + "\",";
 			lines.add(s);
 			
-			s = "		\"desc\": \"" + Utils.escapeQuotes(c.getDescription()) + "\",";
+			s = "		\"desc\": \"" + Utils.escapeSpecialCharacters(c.getDescription()) + "\",";
 			lines.add(s);
 			
 			s = "		\"copies\": " + c.getCopies() + "";
