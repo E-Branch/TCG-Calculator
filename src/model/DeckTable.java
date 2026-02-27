@@ -190,7 +190,7 @@ public class DeckTable extends AbstractTableModel {
 	}
 	
 	/**
-	 * returns the card at inx
+	 * returns the card at index inx
 	 * 
 	 * @param inx the index of the card
 	 * @return the Card at inx
@@ -207,7 +207,7 @@ public class DeckTable extends AbstractTableModel {
 	/**
 	 * Clears the current deck and loads the cards from the provided file
 	 * 
-	 * @param file CSV or JSON file
+	 * @param file a CSV or JSON file
 	 */
 	public void loadFromFile(File file) {
 		deck.clear();
@@ -220,8 +220,9 @@ public class DeckTable extends AbstractTableModel {
 	}
 	
 	/**
-	 * loads the cards from the provided CSV file into deck
-	 * @param file CSV file
+	 * loads the cards from the provided CSV file into deck, using a custom parsing algorithm
+	 * 
+	 * @param file the CSV file to read
 	 */
 	private void readCSVFile(File file) {
 		boolean firstLine = true;
@@ -263,18 +264,18 @@ public class DeckTable extends AbstractTableModel {
 	}
 	
 	/**
-	 * Creates a list of lines to save to the CSV file
-	 * @return an array list of strings, of lines to save to the CSV, with double quotes for strings (escape double quotes inside strings)
+	 * Generates the lines for a CSV file representing the current deck
+	 * 
+	 * @return ArrayList of strings, with all of the lines of the file in order
 	 */
 	public ArrayList<String> toCSVLines() {
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		lines.add("\"Name\",\"Description\",\"Copies\"");
 		
-		for (Card c : deck) {
+		for (Card c : deck) {	// creates a line for card, eg. "Ace","The \"1\" card, often the highest value card",4
 			String s = "";
 			s = s + "\"" + Utils.escapeQuotes(c.getName()) + "\",";
-			
 			s = s + "\"" + Utils.escapeQuotes(c.getDescription()) + "\",";
 			s = s + c.getCopies();
 			
@@ -285,7 +286,8 @@ public class DeckTable extends AbstractTableModel {
 	}
 
 	/**
-	 * loads the cards from the provided JSON file into the deck
+	 * Loads the cards from the provided JSON file into the deck, using a custom parsing algorithm
+	 * 
 	 * @param file the JSON file to read
 	 */
 	private void readJSONFile(File file) {
@@ -294,29 +296,47 @@ public class DeckTable extends AbstractTableModel {
 			fileReader.next("\\[");
 			
 			while(fileReader.hasNext("\\{")) {
+				// get to the name line
 				fileReader.next("\\{");
 				fileReader.nextLine();
 				
+				// name line
 				String nameLine = fileReader.nextLine();
 				Matcher nameMatcher = JSONNamePattern.matcher(nameLine);
 				nameMatcher.find();
 				
-				String name = nameMatcher.group(1);
-				System.out.println("Name: " + name);
+				String name = Utils.reverseEscapeQuotes(nameMatcher.group(1));
 				
+				
+				// description line
 				String descLine = fileReader.nextLine();
 				Matcher descMatcher = JSONDescPattern.matcher(descLine);
 				descMatcher.find();
 				
-				String desc = nameMatcher.group(1);
-				System.out.println("Desc: " + desc);
+				String desc = Utils.reverseEscapeQuotes(descMatcher.group(1));
 				
+				
+				// copies line
 				String copiesLine = fileReader.nextLine();
 				Matcher copiesMatcher = JSONCopiesPattern.matcher(copiesLine);
 				copiesMatcher.find();
 				
 				int copies = Integer.parseInt(copiesMatcher.group(1));
-				System.out.println("Copies: " + copies);
+				
+				
+				//add card with information from abole
+				try {
+					Card newCard = new Card(name, desc, copies);
+					deck.add(newCard);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("Error Loading Card");
+					e.printStackTrace();
+				}
+				
+				
+				//move file reader to next "\\{" line
+				fileReader.nextLine();
 				
 			}
 			
@@ -328,6 +348,11 @@ public class DeckTable extends AbstractTableModel {
 		
 	}
 	
+	/**
+	 * Generates the lines for a JSON file representing the current deck
+	 * 
+	 * @return ArrayList of strings, with all of the lines of the file in order
+	 */
 	public ArrayList<String> toJSONLines(){
 		ArrayList<String> lines = new ArrayList<String>();
 		
