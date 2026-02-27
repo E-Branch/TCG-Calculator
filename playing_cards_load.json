@@ -1,0 +1,67 @@
+[
+	{
+		"name": "Ace",
+		"desc": "The \"1\" card, often the highest value card",
+		"copies": 4
+	},
+	{
+		"name": "2",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "3",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "4",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "5",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "6",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "7",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "8",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "9",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "10",
+		"desc": "",
+		"copies": 4
+	},
+	{
+		"name": "Jack",
+		"desc": "The \"11\" card",
+		"copies": 4
+	},
+	{
+		"name": "Queen",
+		"desc": "The \"12\" card",
+		"copies": 4
+	},
+	{
+		"name": "King",
+		"desc": "The \"13\" card",
+		"copies": 4
+	},
+]
