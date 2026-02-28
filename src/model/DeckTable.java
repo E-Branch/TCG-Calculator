@@ -3,7 +3,12 @@
  */
 package model;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -11,6 +16,13 @@ import javax.swing.table.AbstractTableModel;
 public class DeckTable extends AbstractTableModel {
 	
 	private ArrayList<Card> deck;
+	
+	Pattern CSVPattern = Pattern.compile("\"(?<name>.*)\",\"(?<desc>.*)\",\"?(?<count>.*)\"?", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+	Pattern JSONArrayPattern = Pattern.compile("\\[(?<array>.*)\\]", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONObjectPattern = Pattern.compile("\\{(?<obj>.*)\\}", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONNamePattern = Pattern.compile("\"name\": \"(?<name>.*)\",[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONDescPattern = Pattern.compile("\"desc\": \"(?<desc>.*)\",[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	Pattern JSONCopiesPattern = Pattern.compile("\"copies\": (?<copies>.*)[\r\n]*", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	/**
 	 * Creates a new Deck with no cards in it
@@ -18,7 +30,24 @@ public class DeckTable extends AbstractTableModel {
 	public DeckTable() {
 		// TODO Auto-generated constructor stub
 		deck = new ArrayList<Card>();
+		
+		 
 	}
+	
+	/**
+	 * Creates a new Deck populated with cards from file
+	 */
+	public DeckTable(File file) {
+		this();
+		
+		if(Utils.isCSV(file)) {
+			readCSVFile(file);
+		} else if (Utils.isJSON(file)) {
+			readJSONFile(file);
+		}
+		
+	}
+
 
 	@Override
 	public int getColumnCount() {
@@ -161,7 +190,7 @@ public class DeckTable extends AbstractTableModel {
 	}
 	
 	/**
-	 * returns the card at inx
+	 * returns the card at index inx
 	 * 
 	 * @param inx the index of the card
 	 * @return the Card at inx
@@ -174,5 +203,178 @@ public class DeckTable extends AbstractTableModel {
 			return deck.get(inx);
 		}
 	}
+	
+	/**
+	 * Clears the current deck and loads the cards from the provided file
+	 * 
+	 * @param file a CSV or JSON file
+	 */
+	public void loadFromFile(File file) {
+		deck.clear();
+		
+		if(Utils.isCSV(file)) {
+			readCSVFile(file);
+		} else if (Utils.isJSON(file)) {
+			readJSONFile(file);
+		}
+	}
+	
+	/**
+	 * loads the cards from the provided CSV file into deck, using a custom parsing algorithm
+	 * 
+	 * @param file the CSV file to read
+	 */
+	private void readCSVFile(File file) {
+		boolean firstLine = true;
+		try (Scanner fileReader = new Scanner(file)){
+			while (fileReader.hasNextLine()) {
+				String nextLine = fileReader.nextLine();
+				if (firstLine == false) {
+					
+					Matcher m = CSVPattern.matcher(nextLine);
+					m.matches();
+					
+					String name = Utils.reverseEscapeSpecialCharacters(m.group(1));
+					String desc = Utils.reverseEscapeSpecialCharacters(m.group(2));
+					int count = Integer.parseInt(m.group(3));
+					
+					
+					try {
+						Card newCard = new Card(name, desc, count);
+						addCard(newCard);
+					} catch (Exception e) {
+						// TODO: instead, should perhaps throw an exception, giving the user more information on which card failed to load
+						System.out.println("Error Loading Card");
+						e.printStackTrace();
+					}
+					
+					//System.out.println(deck);
+					
+					
+					
+				} else {
+					firstLine = false;
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO: instead, should perhaps throw an exception?
+			System.out.println("Error opening CSV file");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Generates the lines for a CSV file representing the current deck
+	 * 
+	 * @return ArrayList of strings, with all of the lines of the file in order
+	 */
+	public ArrayList<String> toCSVLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		
+		lines.add("\"Name\",\"Description\",\"Copies\"");
+		
+		for (Card c : deck) {	// creates a line for card, eg. "Ace","The \"1\" card, often the highest value card",4
+			String s = "";
+			s = s + "\"" + Utils.escapeSpecialCharacters(c.getName()) + "\",";
+			s = s + "\"" + Utils.escapeSpecialCharacters(c.getDescription()) + "\",";
+			s = s + c.getCopies();
+			
+			lines.add(s);
+		}
+		
+		return lines;
+	}
 
+	/**
+	 * Loads the cards from the provided JSON file into the deck, using a custom parsing algorithm
+	 * 
+	 * @param file the JSON file to read
+	 */
+	private void readJSONFile(File file) {
+		// TODO: method stub
+		try (Scanner fileReader = new Scanner(file)){
+			fileReader.next("\\[");
+			
+			while(fileReader.hasNext("\\{")) {
+				// get to the name line
+				fileReader.next("\\{");
+				fileReader.nextLine();
+				
+				// name line
+				String nameLine = fileReader.nextLine();
+				Matcher nameMatcher = JSONNamePattern.matcher(nameLine);
+				nameMatcher.find();
+				
+				String name = Utils.reverseEscapeSpecialCharacters(nameMatcher.group(1));
+				
+				
+				// description line
+				String descLine = fileReader.nextLine();
+				Matcher descMatcher = JSONDescPattern.matcher(descLine);
+				descMatcher.find();
+				
+				String desc = Utils.reverseEscapeSpecialCharacters(descMatcher.group(1));
+				
+				
+				// copies line
+				String copiesLine = fileReader.nextLine();
+				Matcher copiesMatcher = JSONCopiesPattern.matcher(copiesLine);
+				copiesMatcher.find();
+				
+				int copies = Integer.parseInt(copiesMatcher.group(1));
+				
+				
+				//add card with information from abole
+				try {
+					Card newCard = new Card(name, desc, copies);
+					deck.add(newCard);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("Error Loading Card");
+					e.printStackTrace();
+				}
+				
+				
+				//move file reader to next "\\{" line
+				fileReader.nextLine();
+				
+			}
+			
+		}catch (FileNotFoundException e) {
+			// TODO: instead, should perhaps throw an exception?
+			System.out.println("Error opening JSON file");
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * Generates the lines for a JSON file representing the current deck
+	 * 
+	 * @return ArrayList of strings, with all of the lines of the file in order
+	 */
+	public ArrayList<String> toJSONLines(){
+		ArrayList<String> lines = new ArrayList<String>();
+		
+		lines.add("[");
+		
+		for (Card c: deck) {
+			String s = "";
+			lines.add("	{");
+			
+			s = "		\"name\": \"" + Utils.escapeSpecialCharacters(c.getName()) + "\",";
+			lines.add(s);
+			
+			s = "		\"desc\": \"" + Utils.escapeSpecialCharacters(c.getDescription()) + "\",";
+			lines.add(s);
+			
+			s = "		\"copies\": " + c.getCopies() + "";
+			lines.add(s);
+			
+			lines.add("	},");
+		}
+		
+		lines.add("]");
+		return lines;
+	}
 }

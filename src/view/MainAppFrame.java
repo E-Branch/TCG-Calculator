@@ -12,6 +12,8 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+
 import java.awt.Window.Type;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
@@ -28,14 +30,29 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 
+import model.CSVFilter;
 import model.Card;
+import model.DeckFilter;
 import model.DeckTable;
 import model.DeckTableSelectionListener;
+import model.JSONFilter;
+import model.Utils;
 
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
 
 public class MainAppFrame extends JFrame {
 
@@ -47,6 +64,8 @@ public class MainAppFrame extends JFrame {
 	
 	protected DeckTable deckTable;
 	private int selectedInx = -1;
+	
+	final JFileChooser fileChooser = new JFileChooser();
 
 	/**
 	 * Launch the application.
@@ -69,6 +88,10 @@ public class MainAppFrame extends JFrame {
 	 */
 	public MainAppFrame() {
 		setTitle("TCG Calculator by E-BRANCH");
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(new DeckFilter());
+		fileChooser.addChoosableFileFilter(new CSVFilter());
+		fileChooser.addChoosableFileFilter(new JSONFilter());
 		initGUI();
 
 	}
@@ -76,6 +99,52 @@ public class MainAppFrame extends JFrame {
 	private void initGUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
+		
+		/**
+		 * Menu Bar
+		 */
+		
+		JMenuBar mnbrMainMenu = new JMenuBar();
+		setJMenuBar(mnbrMainMenu);
+		
+		JMenu mnFile = new JMenu("File");
+		mnbrMainMenu.add(mnFile);
+		
+		JMenuItem mntmLoad = new JMenuItem("Load Deck");
+		mntmLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				loadFile();
+			}
+		});
+		mnFile.add(mntmLoad);
+		
+		JMenuItem mntmSave = new JMenuItem("Save Deck");
+		mntmSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveFile();
+			}
+		});
+		mnFile.add(mntmSave);
+		
+		/*
+		 * JSeparator separator_1 = new JSeparator(); mnFile.add(separator_1);
+		 * 
+		 * JMenu mnImport = new JMenu("Import Deck..."); mnFile.add(mnImport);
+		 */
+		
+		/**
+		 * YDK gives a list of card IDs
+		 * Connecting to external card databases is a bit beyond the scope
+		 */
+		/*
+		 * JMenuItem mntmFromYDK = new JMenuItem("... from YDK");
+		 * mnImport.add(mntmFromYDK);
+		 */
+		
+		
+		
+		
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -219,6 +288,65 @@ public class MainAppFrame extends JFrame {
 	}
 	
 	/**
+	 * Opens a filechooser to select a file to load, exits if action canceled
+	 */
+	private void loadFile() {
+		// TODO: Check if changes have been made to open deck
+		// if so, there should be a dialog to ask if the user wants to save their changes
+		int returnVal = fileChooser.showOpenDialog(this);
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+
+			deckTable.loadFromFile(file);
+			updateUI();
+		} else {
+			System.out.println("action canceled");
+		}
+	}
+	
+	/**
+	 * Opens a file chooser to select a save file, exits if action canceled or file write error
+	 * if successful, it will save the current deck to the selected file
+	 */
+	private void saveFile() {
+		// TODO: Check if the deck already has a filename
+		// regular "Save" should automatically overwrite if deck already has filename
+		// opens file chooser if "Save As" chosen or if deck doesn't have filename already
+		int returnVal = fileChooser.showSaveDialog(this);
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();			
+				
+			try {
+				FileWriter fileWriter = new FileWriter(file);
+				ArrayList<String> lines;
+				if (Utils.isCSV(file)) {
+					lines = deckTable.toCSVLines();
+				} else if (Utils.isJSON(file)) {
+					lines = deckTable.toJSONLines();
+				} else {
+					throw new Exception("invalid file extension");
+				}
+				fileWriter.write("");
+				for (String l: lines) {
+					fileWriter.append(l);
+					fileWriter.append("\n");
+				}
+				fileWriter.close();
+				
+			} catch (Exception e) {
+				System.out.println("file write error");
+				e.printStackTrace();
+			}
+			
+		} else {
+			System.out.println("action canceled");
+		}
+	}
+	
+	
+	/**
 	 * updates the table element
 	 */
 	protected void updateUI() {
@@ -229,7 +357,6 @@ public class MainAppFrame extends JFrame {
 	 * clear the selection after deletion
 	 */
 	protected void clearSelection() {
-		//tblDeckTable.clearSelection();
 		tblDeckTable.getSelectionModel().clearSelection();
 	}
 }
