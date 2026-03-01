@@ -5,6 +5,39 @@
  */
 
 
+// TODO: Check if the deck already has a filename
+// regular "Save" should automatically overwrite if deck already has filename
+// opens file chooser if "Save As" chosen or if deck doesn't have filename already
+
+/**
+ * TODO: update the UX for file chooser further
+ * 
+ * the filename of the currently opened deck should be saved somewhere
+ * 
+ * "save as" option
+ * 		- opens filechooser with currently opened file selected (and corresponding file filter)
+ * 		- if current file doesn't have a name, suggests the name "untitled_deck.csv"
+ * 
+ * "save" option
+ * 		- doesn't open file chooser if there is a currently opened file, just saves it
+ * 		- if current file doesn't have a name, behaves as "save as" described above
+ * 
+ * save and load
+ * 		- should be kept separate
+ * 		- currently opening "save" then "load" resets the selected file filter, which is not ideal
+ * 		- instead, they should share:
+ * 			- directory
+ * 			- file filter if its "csv" or "json", otherwise "save"'s should be kept separate
+ * 			- file name IF there is a currently selected file
+ * 
+ * cross instance
+ * 		- some information about the file chooser should be saved across app instances
+ * 			- current directory
+ * 			- selected file filter
+ * 
+ */
+
+
 package view;
 
 import java.awt.EventQueue;
@@ -66,6 +99,10 @@ public class MainAppFrame extends JFrame {
 	private int selectedInx = -1;
 	
 	final JFileChooser fileChooser = new JFileChooser();
+	
+	final DeckFilter deckFilter = new DeckFilter();
+	final CSVFilter csvFilter = new CSVFilter();
+	final JSONFilter jsonFilter = new JSONFilter();
 
 	/**
 	 * Launch the application.
@@ -88,10 +125,11 @@ public class MainAppFrame extends JFrame {
 	 */
 	public MainAppFrame() {
 		setTitle("TCG Calculator by E-BRANCH");
+		
 		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.setFileFilter(new DeckFilter());
-		fileChooser.addChoosableFileFilter(new CSVFilter());
-		fileChooser.addChoosableFileFilter(new JSONFilter());
+		fileChooser.setFileFilter(deckFilter);
+		fileChooser.addChoosableFileFilter(csvFilter);
+		fileChooser.addChoosableFileFilter(jsonFilter);
 		initGUI();
 
 	}
@@ -310,24 +348,44 @@ public class MainAppFrame extends JFrame {
 	 * if successful, it will save the current deck to the selected file
 	 */
 	private void saveFile() {
-		// TODO: Check if the deck already has a filename
-		// regular "Save" should automatically overwrite if deck already has filename
-		// opens file chooser if "Save As" chosen or if deck doesn't have filename already
+		
+		fileChooser.setSelectedFile(new File("untitled.csv"));
+		fileChooser.setFileFilter(csvFilter);
+		fileChooser.removeChoosableFileFilter(deckFilter);
+		
 		int returnVal = fileChooser.showSaveDialog(this);
 		
+		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();			
+			File file = fileChooser.getSelectedFile();
+			System.out.println(file);
 				
 			try {
-				FileWriter fileWriter = new FileWriter(file);
 				ArrayList<String> lines;
 				if (Utils.isCSV(file)) {
 					lines = deckTable.toCSVLines();
+					
 				} else if (Utils.isJSON(file)) {
 					lines = deckTable.toJSONLines();
+					
+				} else if (Utils.extensionIsBlank(file)) {
+					
+					if (fileChooser.getFileFilter().equals(csvFilter) ) {
+						file = new File(file.getAbsolutePath() + ".csv");
+						lines = deckTable.toCSVLines();
+						
+					} else {
+						file = new File(file.getAbsolutePath() + ".json");
+						lines = deckTable.toJSONLines();
+						
+					}
+					
 				} else {
 					throw new Exception("invalid file extension");
 				}
+				FileWriter fileWriter = new FileWriter(file);
+				
+				
 				fileWriter.write("");
 				for (String l: lines) {
 					fileWriter.append(l);
@@ -340,9 +398,13 @@ public class MainAppFrame extends JFrame {
 				e.printStackTrace();
 			}
 			
+			
 		} else {
 			System.out.println("action canceled");
 		}
+		
+		fileChooser.addChoosableFileFilter(deckFilter);
+		fileChooser.setFileFilter(deckFilter);
 	}
 	
 	
