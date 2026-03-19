@@ -349,9 +349,15 @@ public class MainAppFrame extends JFrame {
 	 */
 	private void saveFile() {
 		
-		fileChooser.setSelectedFile(new File("untitled.csv"));
-		fileChooser.setFileFilter(csvFilter);
-		fileChooser.removeChoosableFileFilter(deckFilter);
+		if (fileChooser.getFileFilter() == jsonFilter) {
+			fileChooser.setSelectedFile(new File("untitled.json"));
+			fileChooser.setFileFilter(jsonFilter);
+			fileChooser.removeChoosableFileFilter(deckFilter);
+		} else {
+			fileChooser.setSelectedFile(new File("untitled.csv"));
+			fileChooser.setFileFilter(csvFilter);
+			fileChooser.removeChoosableFileFilter(deckFilter);
+		}
 		
 		int returnVal = fileChooser.showSaveDialog(this);
 		
